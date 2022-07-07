@@ -4,10 +4,10 @@ import Card from '../UI/Card';
 import MealItem from './MealItem/MealItem';
 import classes from './AvailableMeals.module.css';
 
-
-
 const AvailableMeals = () => {
-  const [meals, setMeals] = useState([])
+  const [meals, setMeals] = useState([]);
+  const [isLoading, setIsLoading] = useState([true]);
+  // const [meals, setMeals] = useState([]);
 
   // UseEffect cannot use async function, so create a nested async function
   useEffect(() => {
@@ -26,10 +26,19 @@ const AvailableMeals = () => {
         });
       }
       setMeals(loadedMeals);
-    }
+      setIsLoading(false);
+    };
 
     fetchMeals();
-  }, [])
+  }, []);
+
+  if(isLoading) {
+    return (
+      <section className={classes.MealsLoading}>
+        <p>Loading...</p>
+      </section>
+    )
+  }
 
   const mealsList = meals.map((meal) => (
     <MealItem id={meal.id} key={meal.id} name={meal.name} description={meal.description} price={meal.price} />
