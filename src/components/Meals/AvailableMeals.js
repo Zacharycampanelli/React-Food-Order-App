@@ -6,13 +6,18 @@ import classes from './AvailableMeals.module.css';
 
 const AvailableMeals = () => {
   const [meals, setMeals] = useState([]);
-  const [isLoading, setIsLoading] = useState([true]);
-  // const [meals, setMeals] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [httpError, setHttpError] = useState();
 
   // UseEffect cannot use async function, so create a nested async function
   useEffect(() => {
     const fetchMeals = async () => {
       const response = await fetch('https://tasks-4fec6-default-rtdb.firebaseio.com/meals.json');
+
+      if (!response.ok) {
+        throw new Error('Something went wrong!');
+      }
+
       const responseData = await response.json();
 
       const loadedMeals = [];
@@ -29,15 +34,27 @@ const AvailableMeals = () => {
       setIsLoading(false);
     };
 
-    fetchMeals();
+    // Error handling of promises must be done this way, since fetchMeals needs to be async., which it cannot because it is in useEffect
+    fetchMeals().catch((error) => {
+      setIsLoading(false);
+      setHttpError(error.message);
+    });
   }, []);
 
-  if(isLoading) {
+  if (isLoading) {
     return (
       <section className={classes.MealsLoading}>
         <p>Loading...</p>
       </section>
-    )
+    );
+  }
+
+  if (httpError) {
+    return (
+      <section className={classes.MealsError}>
+        <p>{httpError}</p>
+      </section>
+    );
   }
 
   const mealsList = meals.map((meal) => (
